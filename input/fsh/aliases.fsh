@@ -1,0 +1,11 @@
+Alias: PLANNETHealthcareService = http://hl7.org/fhir/us/davinci-pdex-plan-net/StructureDefinition/plannet-HealthcareService
+Alias: PLANNETLocation = http://hl7.org/fhir/us/davinci-pdex-plan-net/StructureDefinition/plannet-Location
+Alias: Accessibility = http://hl7.org/fhir/us/davinci-pdex-plan-net/StructureDefinition/accessibility
+// Alias: location-boundary-geojson = http://hl7.org/fhir/StructureDefinition/location-boundary-geojson
+Alias: ContactPointAvailableTime  = http://hl7.org/fhir/us/davinci-pdex-plan-net/StructureDefinition/contactpoint-availabletime
+Alias: $R4GeoJSONExtension = http://hl7.org/fhir/StructureDefinition/location-boundary-geojson
+Alias: TYPE = http://terminology.hl7.org/CodeSystem/v2-0203
+Alias: ORGTYPEVS =  http://hl7.org/fhir/us/davinci-pdex-plan-net/ValueSet/OrgTypeVS
+Alias: PLANNETOrganization = http://hl7.org/fhir/us/davinci-pdex-plan-net/StructureDefinition/plannet-Organization
+Alias: Qualification = http://hl7.org/fhir/us/davinci-pdex-plan-net/StructureDefinition/qualification
+Alias: IRS = http://www.irs.gov

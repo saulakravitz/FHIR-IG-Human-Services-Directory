@@ -1,17 +1,67 @@
-Alias: PLANNETHealthcareService = http://hl7.org/fhir/us/davinci-pdex-plan-net/StructureDefinition/plannet-HealthcareService
 
 Profile: HSDSHealthcareService
-Parent: PLANNETHealthcareService
+//Parent: PLANNETHealthcareService
+Parent: HealthcareService
 Id: hsds-HealthcareService
 Title:    "HSDSHealthcareService"
 Description: "The HSDSHealthcareService resource describes the social and human services offered by Community-Based Organizations (CBO) at a given location. This resource may be used to encompass a variety of human and social care service interventions that assist patients and clients with unmet social needs. Examples include food, housing/shelter, income & employment, public transportation, public education, legal services, disability and aging and mental and physical health."
- 
+
 * identifier.use = #official (exactly)
 * telecom.use = #work (exactly)
-* category from http://hl7.org/fhir/us/hsds/ValueSet/HumanServiceCategory
-* type from http://hl7.org/fhir/us/hsds/ValueSet/HumanServiceType
-* providedBy only Reference(hsds-Organization)
-* location only Reference(hsds-Location)
+* category from HumanServiceCategory (example)
+* type from HumanServiceType (example)
+//* providedBy only Reference(HSDSOrganization)   -- sushi complains, not sure why
+//* location only Reference(HSDSLocation)   -- sushi complains, not sure why
+* meta.lastUpdated 1..1
+* extension contains
+    NewPatients named newpatients 0..* MS and
+    DeliveryMethod named deliverymethod 0..* MS
+* extension[newpatients] ^short = "New Patients"
+* extension[deliverymethod] ^short = "Delivery Method"
+* identifier.type MS
+* identifier.value MS
+* active 1..1 MS
+* active = true
+// * providedBy only Reference(PlannetOrganization)
+* providedBy MS
+* category 1..1 MS
+//* category from HealthcareServiceCategoryVS (extensible)
+* type MS
+//* type from HealthcareServiceTypeVS (extensible)
+* specialty MS
+* specialty from SpecialtiesVS (required)
+//* location only Reference(PlannetLocation)
+* location MS
+* name MS
+* comment MS
+* telecom MS
+* telecom.extension contains
+       ContactPointAvailableTime named contactpoint-availabletime 0..* MS and
+       ViaIntermediary named via-intermediary 0..* MS
+* telecom.extension[via-intermediary] ^short = "Via Intermediary"
+* telecom.system MS
+* telecom.value MS
+//* coverageArea only Reference(PLANNETLocation)   -- sushi complains, not sure why
+* coverageArea MS
+// * serviceProvisionCode MS
+// eligibility  MS
+// program
+//* characteristic MS
+//* referralMethod MS
+* appointmentRequired MS
+* availableTime MS
+* availableTime.daysOfWeek MS
+* availableTime.allDay MS
+* availableTime.availableStartTime MS
+* availableTime.availableEndTime MS
+* notAvailable MS
+* notAvailable.description MS
+* notAvailable.during MS
+* availabilityExceptions MS
+* endpoint only Reference(PlannetEndpoint)
+* endpoint MS
+
+
 
 Mapping: HSDSHealthcareServiceToHSDS
 Source: HSDSHealthcareService
@@ -22,7 +72,7 @@ Description: "This section describes the way HSDS version 2.0.1 elements are map
 * id  -> "service.id Note: Each service must have a unique identifier."
 * meta  -> "metadata Note: The HSDS metadata table contains a record of the changes that have been made to the data in order to maintain provenance information."
 * meta.lastUpdated  -> "metadata.last_action_date Note: The date when data was changed. Since there may be more than one metadata record for each location, the latest max(last_action_date) needs to be used from metadata where  service.id =  metadata.resource_id."
-* extension[newpatients]  -> "No Source. Note: This is a GAP in HSDS. This extension indicates whether new patients are being accepted in general, or from a specific network."  
+* extension[newpatients]  -> "No Source. Note: This is a GAP in HSDS. This extension indicates whether new patients are being accepted in general, or from a specific network."
 * extension[delivery-method]  -> "No Source. Note: This is a GAP in HSDS. While this is a Must Support element in the parent Plan-Net profile, it is optional and therefore, will be ignored."
 * identifier  -> "No Source. May be excluded from the mapping. Note: This is a GAP in HSDS. There are no business identifiers associated with services in HSDS."
 * identifier.id -> "No Source. May be excluded from the mapping. Note: This is a GAP in HSDS. There are no business identifiers associated with services in HSDS."
@@ -32,10 +82,10 @@ Description: "This section describes the way HSDS version 2.0.1 elements are map
 * identifier.value  -> "No Source. Note: This is a GAP in HSDS. There are no business identifiers associated with locations in HSDS."
 * identifier.period  -> "No Source. May be excluded from the mapping. Note: This is a GAP in HSDS. There are no business identifiers associated with locations in HSDS."
 * identifier.assigner  -> "No Source. May be excluded from the mapping. Note: This is a GAP in HSDS. There are no business identifiers associated with locations in HSDS."
-* active  -> "If HSDS service.status = 'active' then FHIR HealthcareService.active = 'true', else HealthcareService.active = 'false'. 
+* active  -> "If HSDS service.status = 'active' then FHIR HealthcareService.active = 'true', else HealthcareService.active = 'false'.
 Note: HSDS service.status values are 'active', 'inactive', 'defunct' and 'temporarily closed'. All types other than 'active' are considered 'inactive' as per FHIR status."
-* providedBy  -> "reference.reference = service.organization_id 
-reference.type = 'Organization' 
+* providedBy  -> "reference.reference = service.organization_id
+reference.type = 'Organization'
 reference.display = organization.name
 Note: This element is of data type Reference that refers to the organization resource that provides this service."
 * category  -> "category.coding.system = 'http://211hsis.org'
@@ -48,10 +98,10 @@ category.coding.code = taxonomy_term.term
 cateory.coding.display = taxonomy_term.description
 category.text = taxonomy_term.description
 Note: This mapping is to the service type level taxonomy term that will be directly linked to the service attribute.  Linkage to service type term is from service.id = service_attribute_id, service_attribute.taxonomy_term_id = taxonomy_term.id/.  Service Type binding will be to specific concepts from 211 Human Services Indexing System."
-* specialty  -> "No Source. 
+* specialty  -> "No Source.
 Note: This is a GAP in HSDS. specialty is defined as Must Support in the Plan-Net profile but optional element. The Plan-Net profile defines as required binding to valueset that refers to the standardized NUCC taxonomy https://taxonomy.nucc.org/. However, this taxonomy does not contain most of the human services specific provider types (except 332U00000X: Home Delivered Meals). This mapping will be ignored for the time being until NUCC is extended to include human service providers and HSDS is modified to include the specialty of providers who can provide this service."
 * location  -> "reference.reference = service_at_location.location_id
-reference.type = 'Location' 
+reference.type = 'Location'
 reference.display = location.name
 Note: This element is of data type Reference that refers to the location resource where a given service can be provided. Linkage to location is service.id = service_at_location.service_id, service_at_location.location_id = location.id. There may be multiple locations for a given service. Since FHIR location is an array (list), each location will be populated in an individual position in the array."
 * name  -> "service.name"
@@ -63,24 +113,24 @@ Note: This element is of data type Reference that refers to the location resourc
 * telecom.extension[contactpoint-availabletime]  -> "No Source.
 Note: This is a GAP in HSDS. This FHIR extension is added by the Plan-Net profile and represents available hours for the telecom (e.g. customer service phone hours from 8AM-6PM M-F). There is no equivalent mapping to this data element in HSDS since the HSDS schedule table contains details of when a service or location is open and is not related to a phone line associated with a location."
 * telecom.extension[via-intermediary] -> "No Source. Note: This is a GAP in HSDS. This FHIR extension added by the Plan-Net profile represents a reference to an alternative point of contact. HSDS does not have the source data to represent an 'intermediary' as that implies some sort of location relationship."
-* telecom.system  -> "For Phone: 
-    if phone.type = 'voice' then system = 'phone'  
-    if phone.type = 'cell' then system = 'phone' 
-    if phone.type = 'fax' then system = 'fax' 
-    if phone.type = 'pager' then system = 'pager' 
-    if phone.type = 'text' then system = 'sms' 
-    if phone.type = 'textphone' then system = 'sms' 
-    if phone.type = 'video' then system = 'other' 
+* telecom.system  -> "For Phone:
+    if phone.type = 'voice' then system = 'phone'
+    if phone.type = 'cell' then system = 'phone'
+    if phone.type = 'fax' then system = 'fax'
+    if phone.type = 'pager' then system = 'pager'
+    if phone.type = 'text' then system = 'sms'
+    if phone.type = 'textphone' then system = 'sms'
+    if phone.type = 'video' then system = 'other'
 For Email:
-    Fixed value  = 'email' 
+    Fixed value  = 'email'
 For Website URL:
-    Fixed value  = 'url' 
+    Fixed value  = 'url'
 Note: There are multiple sources in HSDS for the telecom in FHIR so the system will be populated  based on phone.type mapping or fixed value of 'email' or 'url' depending on the data populated. Drawn from the ContactPointSystem value set [http://hl7.org/fhir/ValueSet/contact-point-system]"
-* telecom.value  -> "For Phone: 
-    value = phone.number 
+* telecom.value  -> "For Phone:
+    value = phone.number
 For Email,
     value = service.email
-For Website URL: 
+For Website URL:
     value  = service.url
 Note: For phone, HSDS service  linkage is to phone table using service.id = phone.service_id."
 * telecom.use  -> "Fixed value  = 'work' Note: This is a GAP in HSDS but since it is for work-related information, it is possible to set this to 'work' drawn from the ContactPointUse value set http://hl7.org/fhir/R4/valueset-contact-point-use.html."
@@ -95,7 +145,7 @@ Note: For phone, HSDS service  linkage is to phone table using service.id = phon
 * eligibility.code  -> "No Source. May be excluded from the mapping."
 * eligibility.comment  -> "No Source. May be excluded from the mapping."
 * program  -> "program[0].text = program.name Note:  Since HSDS does not have any code for the program, only the text element of codeableConcept is mapped. Also, the program data element in FHIR is an array (list), so the program name from HSDS is populated in the first occurrence of the array."
-* characteristic  -> "characteristic[0].text = service.interpretation_services 
+* characteristic  -> "characteristic[0].text = service.interpretation_services
 Note: This is not an obvious mapping but interpretation services is one of the characteristics of the service provision. Also, this data element in FHIR is an array (list), so the interpretation services data from HSDS is populated in the first occurrence of the array."
 * communication  -> "communication[0].text = language.language. Note: This data element in FHIR is an array (list), so the language from HSDS is populated in the first occurrence of the array."
 * referralMethod  -> "No Source. May be excluded from the mapping. Note: This is a GAP in HSDS."
